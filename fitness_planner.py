@@ -21,11 +21,7 @@ def interact_with_user(exercise):
     None
 
 def shuffle(exercises, count):
-    """Apply modifiers and then randomly shuffle list
-    * must be done and is highest priority\n
-    ^ preferred exercises (higher chance of showing up)\n
-    = is for last exercise for a muscle group (if done at all). Meant for isolation exercises
-    """
+    """Apply modifiers and then randomly shuffles list"""
     def build_weights(exercises):
         weights = list(map(lambda x: 0.0 if x.startswith('*') else (1.0 if x.startswith('^') else 0.5), exercises))
         sum_weights = sum(weights)
@@ -47,7 +43,7 @@ def shuffle(exercises, count):
 
 def main():
     exercises = load_config("exercises")
-    routine = load_config("evan_routine")
+    routine = load_config("routine")
 
     current_day = calendar.day_name[date.today().weekday()]
     todays_routine = routine.get(current_day, None)
