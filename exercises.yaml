@@ -1,5 +1,5 @@
 chest:
-- "*medium-grip barbell bench press OR wide-grip barbell bench press"
+- "**medium-grip barbell bench press OR wide-grip barbell bench press"
 - "push ups"
 - "low-incline dumbbell bench press"
 - "dumbbell pullovers"
@@ -33,7 +33,7 @@ biceps:
 - "Incline Hammer Curls OR Hammer Curls"
 - "Wide-Grip Barbell Curl"
 - "Zottman Curls"
-- "Concentration Curls"
+- "^Concentration Curls"
 - "Flexor Incline Dumbbell Curls"
 - "Dumbbell Bicep Curl"
 traps:

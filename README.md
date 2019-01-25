@@ -3,7 +3,7 @@ Fitness Planner generates an exercise plan and tracks your workout progress over
 
 ## Configuration
 
-Fitness_planner requires one config file for a routine and another for a list of exercises.
+There are two config files for setting up routine and list of exercises to choose from.
 
 For each day of the week in routine.yaml, there needs to be a mapping of the muscle group to number of sets
 ```
@@ -18,16 +18,14 @@ Monday:
 exercises.yaml lists exercises for each muscle group
 ```
 chest:
-- "*medium-grip barbell bench press OR wide-grip barbell bench press"
 - "push ups"
 - "low-incline dumbbell bench press"
 - "dumbbell pullovers"
 - "=dumbbell bench press hold"
-- "=dumbbell flyes OR decline dumbbell flyes"
 back:
-- "*negative pull-ups"
+- "pull-ups"
 - "^one-arm dumbbell row"
-- "^deadlift"
+- "**deadlift"
 - "dumbbell incline row"
 - "reverse grip bent-over rows"
 ```
@@ -35,7 +33,7 @@ back:
 An optional modifier may appear in the beginning:
 ```
 *  - an exercise that must be performed
-** - the exercise must be done first (for that muscle group)
+** - the exercise must be done before the others (within that muscle group)
 ^  - preferred exercise (higher probability of being selected)
 =  - last exercise (for that muscle group). Meant for isolation exercises
 ```
