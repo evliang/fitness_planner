@@ -1,7 +1,9 @@
 import os
+import sys
 import yaml
 import json
-from datetime import date
+import time
+from datetime import date, datetime
 import calendar
 import random
 from numpy.random import choice
@@ -11,14 +13,69 @@ def load_config(config):
         conf = yaml.load(f)
     return conf
 
-def interact_with_user(exercise):
-    """
-    Displays current exercise w/ prev # of reps, then #
-    """
-    print(exercise)
-    # for s in range(3): # hardcoding 3 sets & ignoring warmups for now
-    #     input("Set " + str(s+1) + " number of reps: ")
+def load_exercise_history():
+    try:
+        with open('data.json', 'r') as fp:
+            data = json.load(fp)
+        return data
+    except IOError:
+        return dict()
+
+def add_exercise_dictionary(dic, exercise, weight, reps):
+    # {"bench press": {today: [{weight: 150, reps: 6}, {weight: 150, reps: 6}, {weight: 150, reps: 6}]}}
+    today = str(date.today())
+    if dic.get(exercise):
+        if dic[exercise].get(today):
+            dic[exercise][today] = dic[exercise][today] + [{ 'weight': weight, 'reps': reps}]
+        else:
+            dic[exercise][today] = [{ 'weight': weight, 'reps': reps}]
+    else:
+        dic[exercise] = { today: [{ 'weight': weight, 'reps': reps}]}
+    return dic
+
+def save_exercise_history(data):
+    with open('data.json', 'w') as fp:
+        json.dump(data, fp)
+
+def interact_with_user(exercise, num_sets, warmup=False):
+    """Displays the current exercise and tracks number of reps performed"""
+    exercise = random.choice([x.title().strip() for x in exercise.lstrip('*').lstrip('^').lstrip('=').split('OR')])
+    exercise_history = load_exercise_history()
+
+    if exercise_history.get(exercise):
+        last_time = list(exercise_history[exercise].keys())[-1]
+        #last_time_dow = calendar.day_name[datetime.strptime('2014-12-04', '%Y-%m-%d').date().weekday()]
+        prev_numbers = exercise_history[exercise][last_time]
+        prev_numbers = [x['weight'] + 'x' + x['reps'] for x in prev_numbers]
+        print(" ----- {} -----\r\n{}: {}".format(exercise, last_time, ', '.join(prev_numbers)))
+    else:
+        print(exercise)
+
+    for s in range(num_sets): # TODO: handle warmups
+        while True:
+            inp = input("Set " + str(s+1) + "! Enter weight, reps: ")
+            weight = inp.split(',', 1)[0]
+            reps = inp.split(',',1)[1].strip().replace('.','',1)
+            if reps.strip().replace('.','',1).isdigit():
+                break
+            else:
+                print("Invalid input.")
+        exercise_history = add_exercise_dictionary(exercise_history, exercise, weight, reps)
+        save_exercise_history(exercise_history)
+        countdown_for_rest(2)
     None
+
+def countdown_for_rest(min):
+    def display_time(s):
+        display_min = lambda m: str(m) + " min" if m > 0 else ""
+        display_sec = lambda s: str(s) + " sec" if s > 0 else ""
+        sys.stdout.write("Rest for {} {}      ".format(display_min(s//60),display_sec(s%60)))
+    for remaining in range(int(min*60), 0, -1):
+        sys.stdout.write("\r")
+        display_time(remaining)
+        sys.stdout.flush()
+        time.sleep(1)
+    sys.stdout.write("\r")
 
 def shuffle(exercises, count):
     """Apply modifiers and then randomly shuffles list"""
@@ -28,7 +85,7 @@ def shuffle(exercises, count):
         weights = list(map(lambda x: x/sum_weights, weights))
         return weights
 
-    top_priority = [x for x in exercises if x.startswith('*')]
+    top_priority = [x for x in exercises if x.startswith('**')]
     weights = build_weights(exercises)
     # random.choices can result in duplicates
     the_rest = []
@@ -53,8 +110,7 @@ def main():
             exercise_set_count = todays_routine[muscle_group]
             muscle_group_exercises = shuffle(exercises[muscle_group], exercise_set_count)
             for i in range(exercise_set_count):
-                interact_with_user(muscle_group_exercises[i])
-                #countdown()
+                interact_with_user(muscle_group_exercises[i], 3) # hardcoding num_sets for now
 
     else:
         print("IT'S YOUR REST DAY!!!")
