@@ -1,5 +1,7 @@
 # Fitness_Planner
-Fitness Planner generates an exercise plan and tracks your workout progress over time.
+Fitness Planner assists your workout by generating a sensible weightlifting plan, tracking your workout progress, and determining ideal warmup weights and rest times (based off the research discussed in "Bigger, Leaner, Stronger").
+
+Command line program for now because I work out at home.
 
 ## Configuration
 

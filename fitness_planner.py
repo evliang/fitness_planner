@@ -50,6 +50,9 @@ def convert_weight_string(s):
     else:
         return extract_int(s)
 
+def round_nearest_five(num):
+    return int(num//5*5+ (5 if (num%5) >= 2.5 else 0))
+
 def interact_with_user(exercise, num_sets, warmup=False):
     """Displays the current exercise and tracks number of reps performed"""
     exercise = random.choice([x.title().strip() for x in exercise.lstrip('*').lstrip('^').lstrip('=').split('OR')])
@@ -65,23 +68,22 @@ def interact_with_user(exercise, num_sets, warmup=False):
     
     if warmup:
         if not prev_numbers:
-            inp = input("What's your best guess of your 4-6RM for {}?".format(exercise))
+            inp = input(f"What's your best guess of your 4-6RM for {exercise}?")
             weight = convert_weight_string(inp)
         else:
             weight = convert_weight_string(prev_numbers[0]["weight"])
         print("       ( warm up ) ")
-        z = input(f"12 reps of {int(weight/2)}. Any key to continue...")
-        countdown_for_rest(1)
-        z = input(f"10 reps of {int(weight/2)}. Any key to continue...")
-        countdown_for_rest(1)
-        z = input(f"6 reps of {int(weight*0.7)}. Any key to continue...")
-        countdown_for_rest(1)
-        z = input(f"12 reps of {int(weight*0.9)}. Any key to continue...")
-        countdown_for_rest(2)
+        
+        def warmup_routine(reps, percent, rest_min):
+            input(f"{reps} reps of {round_nearest_five(weight*percent)}. Press Enter to continue...")
+            countdown_for_rest(rest_min)
+        
+        for (reps, percent, rest_min) in [(.5, 12, 1), (.5, 10, 1), (.7, 6, 1), (.9, 2, 2)]:
+            warmup_routine(reps, percent, rest_min)
 
     if exercise_history.get(exercise):
         prev_num_str = [x['weight'] + 'x' + x['reps'] for x in prev_numbers]
-        print(" ----- {} -----\r\n{}: {}".format(exercise, last_time, ', '.join(prev_num_str)))
+        print(f" ----- {exercise} -----\r\n{last_time}: {', '.join(prev_num_str)}")
 
     for s in range(num_sets): # TODO: handle warmups
         while True:
@@ -101,7 +103,7 @@ def countdown_for_rest(min):
     def display_time(s):
         display_min = lambda m: str(m) + " min" if m > 0 else ""
         display_sec = lambda s: str(s) + " sec" if s > 0 else ""
-        sys.stdout.write("Rest for {} {}      ".format(display_min(s//60),display_sec(s%60)))
+        sys.stdout.write(f"Rest for {display_min(s//60)} {display_sec(s%60)}         ")
     for remaining in range(int(min*60), 0, -1):
         sys.stdout.write("\r")
         display_time(remaining)
