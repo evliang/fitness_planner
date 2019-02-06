@@ -37,19 +37,51 @@ def save_exercise_history(data):
     with open('data.json', 'w') as fp:
         json.dump(data, fp)
 
+def extract_int(s):
+    return [int(x) for x in s.split() if x.isdigit()][0]
+
+def convert_weight_string(s):
+    """translates input to weight.
+    "bar + 65" => 175 (lbs)
+    not robust"""
+    if "bar" in s:
+        plate_weight = extract_int(s.split("bar")[1].split("+")[1]) # prettify
+        return 45 + plate_weight * 2
+    else:
+        return extract_int(s)
+
 def interact_with_user(exercise, num_sets, warmup=False):
     """Displays the current exercise and tracks number of reps performed"""
     exercise = random.choice([x.title().strip() for x in exercise.lstrip('*').lstrip('^').lstrip('=').split('OR')])
     exercise_history = load_exercise_history()
 
+    prev_numbers = []
     if exercise_history.get(exercise):
         last_time = list(exercise_history[exercise].keys())[-1]
         #last_time_dow = calendar.day_name[datetime.strptime('2014-12-04', '%Y-%m-%d').date().weekday()]
         prev_numbers = exercise_history[exercise][last_time]
-        prev_numbers = [x['weight'] + 'x' + x['reps'] for x in prev_numbers]
-        print(" ----- {} -----\r\n{}: {}".format(exercise, last_time, ', '.join(prev_numbers)))
-    else:
-        print(exercise)
+
+    print(f"===== {exercise} =====")
+    
+    if warmup:
+        if not prev_numbers:
+            inp = input("What's your best guess of your 4-6RM for {}?".format(exercise))
+            weight = convert_weight_string(inp)
+        else:
+            weight = convert_weight_string(prev_numbers[0]["weight"])
+        print("       ( warm up ) ")
+        z = input(f"12 reps of {int(weight/2)}. Any key to continue...")
+        countdown_for_rest(1)
+        z = input(f"10 reps of {int(weight/2)}. Any key to continue...")
+        countdown_for_rest(1)
+        z = input(f"6 reps of {int(weight*0.7)}. Any key to continue...")
+        countdown_for_rest(1)
+        z = input(f"12 reps of {int(weight*0.9)}. Any key to continue...")
+        countdown_for_rest(2)
+
+    if exercise_history.get(exercise):
+        prev_num_str = [x['weight'] + 'x' + x['reps'] for x in prev_numbers]
+        print(" ----- {} -----\r\n{}: {}".format(exercise, last_time, ', '.join(prev_num_str)))
 
     for s in range(num_sets): # TODO: handle warmups
         while True:
@@ -110,7 +142,7 @@ def main():
             exercise_set_count = todays_routine[muscle_group]
             muscle_group_exercises = shuffle(exercises[muscle_group], exercise_set_count)
             for i in range(exercise_set_count):
-                interact_with_user(muscle_group_exercises[i], 3) # hardcoding num_sets for now
+                interact_with_user(muscle_group_exercises[i], 3, i==0) # hardcoding num_sets for now
 
     else:
         print("IT'S YOUR REST DAY!!!")
