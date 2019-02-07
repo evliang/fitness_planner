@@ -78,7 +78,7 @@ def interact_with_user(exercise, num_sets, warmup=False):
             input(f"{reps} reps of {round_nearest_five(weight*percent)}. Press Enter to continue...")
             countdown_for_rest(rest_min)
         
-        for (reps, percent, rest_min) in [(.5, 12, 1), (.5, 10, 1), (.7, 6, 1), (.9, 2, 2)]:
+        for (percent, reps, rest_min) in [(.5, 12, 1), (.5, 10, 1), (.7, 6, 1), (.9, 2, 2)]:
             warmup_routine(reps, percent, rest_min)
 
     if exercise_history.get(exercise):
